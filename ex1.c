@@ -6,31 +6,61 @@ int main(int argc, char *argv[]) {
 
 
     int count = 0;
+    int numberToSearch;
     int *temp = NULL;
     int *data = NULL;
 
-void bubbleSort(int *data, int count) {
+    void bubbleSort(int *data, int count) {
 
-    int i,j,temp; 
+        int i, j, temp;
 
-    count = count - 1;    
+        count = count - 1;
 
-    for(i=0; i<count; i++)
-    {
-        for(j=0; j<count-i; j++)
-        {
-            if(data[j]>data[j+1])
-            {
-                temp = data[j+1];
-                data[j+1] = data[j];
-               data[j] = temp;
+        for (i = 0; i < count; i++) {
+            for (j = 0; j < count - i; j++) {
+                if (data[j] > data[j + 1]) {
+                    temp = data[j + 1];
+                    data[j + 1] = data[j];
+                    data[j] = temp;
+                }
+
             }
 
         }
 
     }
 
-}					
+
+    int binarySearch(int *array, int length, int key) {
+        int first, last, middle, search;
+
+                    printf("%d\n", key);
+
+
+        first = 0;
+        last = length - 1;
+        middle = (first + last) / 2;
+
+        while (first <= last) {
+
+            if (array[middle] < key) {
+
+                first = middle + 1;
+            }
+
+            else if (array[middle] == key) {
+
+                printf("%d found at location %d.\n", key, middle + 1);
+                break;
+            }
+            else
+                last = middle - 1;
+
+            middle = (first + last) / 2;
+        }
+        if (first > last)
+            printf("Not found! %d is not present in the list.\n", key);
+    }
 
     data = malloc(sizeof(int));
 
@@ -74,14 +104,19 @@ void bubbleSort(int *data, int count) {
             }
 
             fclose(file);
-            printf("Reading completed. File contains %d integers!\n", count+1);
+            printf("Reading completed. File contains %d integers!\n", count + 1);
 
             bubbleSort(data, count);
- 			printf("The list is now sorted!\n");
-            for (int i = 0; i < count; i++)
-            {
+            printf("The list is now sorted!\n");
+            for (int i = 0; i < count; i++) {
                 printf("%d\n", data[i]);
             }
+
+            printf("Enter a number to search for:\n");
+
+            scanf("%d", &numberToSearch);
+
+            binarySearch(data, count, numberToSearch);
 
 
         }
