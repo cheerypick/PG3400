@@ -9,29 +9,6 @@ int main(int argc, char *argv[]) {
     int *temp = NULL;
     int *data = NULL;
 
-void bubbleSort(int *data, int count) {
-
-    int i,j,temp; 
-
-    count = count - 1;    
-
-    for(i=0; i<count; i++)
-    {
-        for(j=0; j<count-i; j++)
-        {
-            if(data[j]>data[j+1])
-            {
-                temp = data[j+1];
-                data[j+1] = data[j];
-               data[j] = temp;
-            }
-
-        }
-
-    }
-
-}					
-
     data = malloc(sizeof(int));
 
     if (data == NULL) {
@@ -74,15 +51,7 @@ void bubbleSort(int *data, int count) {
             }
 
             fclose(file);
-            printf("Reading completed. File contains %d integers!\n", count+1);
-
-            bubbleSort(data, count);
- 			printf("The list is now sorted!\n");
-            for (int i = 0; i < count; i++)
-            {
-                printf("%d\n", data[i]);
-            }
-
+            printf("Reading completed. File contains %d integers!\n", count);
 
         }
 
