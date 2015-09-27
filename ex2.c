@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void bubbleSort(int *data, int size) {
-                printf("bubble\n");
 
+
+void bubbleSort(int **pointers, int size) {
 
     int i, j, temp;
 
@@ -11,10 +11,10 @@ void bubbleSort(int *data, int size) {
 
     for (i = 0; i < size; i++) {
         for (j = 0; j < size - i; j++) {
-            if (data[j] > data[j + 1]) {
-                temp = data[j + 1];
-                data[j + 1] = data[j];
-                data[j] = temp;
+            if (*pointers[j] > *pointers[j + 1]) {
+                temp = pointers[j + 1];
+                pointers[j + 1] = pointers[j];
+                pointers[j] = temp;
             }
 
         }
@@ -23,7 +23,11 @@ void bubbleSort(int *data, int size) {
 
 }
 
+
 void insertionSort(int *data, int size) {
+
+                    printf("bubble\n");
+
 
     for (int i = 1; i < size; i++) {
         int value = data[i];
@@ -33,7 +37,6 @@ void insertionSort(int *data, int size) {
         }
         data[j] = value;
     }
-
 }
 
 void merge (int *A, int a, int *B, int b, int *C)
@@ -139,6 +142,7 @@ int main(int argc, char *argv[]) {
     int numberToSearch, algorithmId;
     int *data = NULL;
     int *temp = NULL;
+    int **pointers = NULL;
 
 
     data = malloc(sizeof(int));
@@ -182,12 +186,21 @@ int main(int argc, char *argv[]) {
 
             }
 
+            pointers = malloc(count*sizeof(int *));
+            for(int i =0; i < count; i++) {
+                pointers[i] = &data[i];
+                printf("%d\n", pointers[i] );
+                printf("%d\n", data[i] );
+            }
+
             fclose(file);
 
             printf("Reading completed. File contains %d integers!\n", count);
             printf("Choose the sorting algorithm:\n");
             printf("1: Bubble sort\n");
             printf("2: Insertion sort\n");
+            printf("3: Merge sort\n");
+
             scanf("%d", &algorithmId);
 
             switch (algorithmId) {
@@ -212,7 +225,12 @@ int main(int argc, char *argv[]) {
                 printf("%d\n", data[i]);
             }
 
-            do {
+
+            for (int i = 0; i < count; i++) {
+                printf("%d\n", *pointers[i]);
+            }
+
+            do { 
                 printf("Enter a number to search for:\n");
                 scanf("%d", &numberToSearch);
                 if ( numberToSearch != 0)
