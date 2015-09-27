@@ -24,18 +24,15 @@ void bubbleSort(int **pointers, int size) {
 }
 
 
-void insertionSort(int *data, int size) {
-
-                    printf("bubble\n");
-
+void insertionSort(int **pointers, int size) {
 
     for (int i = 1; i < size; i++) {
-        int value = data[i];
+        int *value = pointers[i];
         int j;
-        for (j = i; j > 0 && value < data[j - 1]; j--) {
-            data[j] = data[j - 1];
+        for (j = i; j > 0 && *value < *pointers[j - 1]; j--) {
+            pointers[j] = pointers[j - 1];
         }
-        data[j] = value;
+        pointers[j] = value;
     }
 }
 
@@ -47,7 +44,6 @@ void merge (int *A, int a, int *B, int b, int *C)
     k = 0;
     while (i < a && j < b) {
         if (A[i] <= B[j]) {
-            /* copy A[i] to C[k] and move the pointer i and k forward */
             C[k] = A[i];
             i++;
             k++;
@@ -135,6 +131,41 @@ int binarySearch(int *array, int length, int key) {
         printf("Not found! %d is not present in the list.\n", key);
 }
 
+int binarySearch2(int **pointerArray, int *original, int length, int key) {
+    int first, last, middle, initialIndex;
+
+    first = 0;
+    last = length - 1;
+    middle = (first + last) / 2;
+
+    while (first <= last) {
+
+        if (*pointerArray[middle] < key) {
+
+            first = middle + 1;
+        }
+
+        else if (*pointerArray[middle] == key) {
+
+            printf("%d found at location %d.\n", key, middle + 1);
+
+            // Pointer arithmetics to the rescue!
+            // Obtain the original index by subtracting the pointer to the first element of original array from the pointer in the sorted array of pointers.
+
+            initialIndex = pointerArray[middle] - original + 1; 
+            printf("Initial position of %d was at location %d.\n", key, initialIndex);
+            break;
+        }
+        else
+            last = middle - 1;
+
+        middle = (first + last) / 2;
+    }
+    if (first > last)
+        printf("Not found! %d is not present in the list.\n", key);
+}
+
+
 int main(int argc, char *argv[]) {
 
 
@@ -186,14 +217,13 @@ int main(int argc, char *argv[]) {
 
             }
 
+            fclose(file);
+
+
             pointers = malloc(count*sizeof(int *));
             for(int i =0; i < count; i++) {
                 pointers[i] = &data[i];
-                printf("%d\n", pointers[i] );
-                printf("%d\n", data[i] );
             }
-
-            fclose(file);
 
             printf("Reading completed. File contains %d integers!\n", count);
             printf("Choose the sorting algorithm:\n");
@@ -208,7 +238,7 @@ int main(int argc, char *argv[]) {
                     bubbleSort(pointers, count);
                     break;
                 case 2:
-                    insertionSort(data, count);
+                    insertionSort(pointers, count);
                     break;
                 case 3:
                     mergeSort(data, count);
@@ -216,7 +246,7 @@ int main(int argc, char *argv[]) {
                 case -1:
                     return EXIT_SUCCESS;
                 default:
-                    printf("enter choice as 1 or 2 or to exit enter -1");
+                    printf("Enter valid option(1,2,3). To exit, enter -1");
             }
 
             printf("The list is now sorted!\n");
@@ -230,26 +260,25 @@ int main(int argc, char *argv[]) {
                 printf("%d\n", *pointers[i]);
             }
 
-            do { 
+            do {
                 printf("Enter a number to search for:\n");
                 scanf("%d", &numberToSearch);
                 if ( numberToSearch != 0)
                 {
                     switch (algorithmId) {
-                case 1:
-                    binarySearch(data, count, numberToSearch);
-                    break;
-                case 2:
-                    binarySearch(data, count, numberToSearch);
-                    break;
-                case 3:
-                    binarySearch(data, count, numberToSearch);
-                    break;
-                case -1:
-                    return EXIT_SUCCESS;
-                default:
-                    printf("enter choice as 1 or 2 or to exit enter -1");
-            }
+                        case 1:
+                            binarySearch2(pointers, data, count, numberToSearch); 
+                            //Sending pointer to first element in original array to find out original indices.
+                            break;
+                        case 2:
+                            binarySearch(data, count, numberToSearch);
+                            break;
+                        case 3:
+                            binarySearch(data, count, numberToSearch);
+                            break;
+                        case -1:
+                            return EXIT_SUCCESS;
+                    }
 
                 }
             } while (numberToSearch != 0);
