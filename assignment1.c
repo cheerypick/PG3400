@@ -12,9 +12,7 @@ By: Ekaterina Orlova
  * Therefore it is possible to keep track of original indices of integers in initial array. */
 
 void bubbleSort(int **pointers, int size) {
-
-        printf("Sorting with bubbleSort...\n");
-
+    
     int i, j;
     intptr_t temp;
 
@@ -32,12 +30,11 @@ void bubbleSort(int **pointers, int size) {
 }
 
 void insertionSort(int **pointers, int size) {
-            printf("Sorting with insertionSort...\n");
-
-
-    for (int i = 1; i < size; i++) {
+    
+    int i, j;
+    
+    for (i = 1; i < size; i++) {
         int *value = pointers[i];
-        int j;
         for (j = i; j > 0 && *value < *pointers[j - 1]; j--) {
             pointers[j] = pointers[j - 1];
         }
@@ -45,69 +42,74 @@ void insertionSort(int **pointers, int size) {
     }
 }
 
-void merge(int *A, int a, int *B, int b, int *C) {
-    int i, j, k;
-    i = 0;
-    j = 0;
-    k = 0;
+/*MergeSort recursive implementation based on
+ * Lusheng Wang's algorithm
+ * http://www.cs.cityu.edu.hk/~lwang/ccs4335/mergesort.c */
+
+void merge(int **first, int a, int **last, int b, int **array) {
+    
+    int i = 0;
+    int j = 0;
+    int k = 0;
+
     while (i < a && j < b) {
-        if (A[i] <= B[j]) {
-            C[k] = A[i];
+        if (*first[i] <= *last[j]) {
+            array[k] = first[i];
             i++;
             k++;
         }
         else {
-            /* copy B[j] to C[k] and move the pointer j and k forward */
-            C[k] = B[j];
+            array[k] = last[j];
             j++;
             k++;
         }
     }
-    /* move the remaining elements in A into C */
+    //Move the remaining elements in first half to result array
     while (i < a) {
-        C[k] = A[i];
+        array[k] = first[i];
         i++;
         k++;
     }
-    /* move the remaining elements in B into C */
+    //Move the remaining elements in the second half to result array
     while (j < b) {
-        C[k] = B[j];
+        array[k] = last[j];
         j++;
         k++;
     }
 }
 
 
-void mergeSort(int *A, int n) {
+void mergeSort(int **array, int size) {
+
     int i;
-    int *A1, *A2;
+    int **first, **last;
     int n1, n2;
 
-    if (n < 2)
-        return;   /* the array is sorted when n=1.*/
+    if (size < 2)
+        return;
 
-    /* divide A into two array A1 and A2 */
-    n1 = n / 2;   /* the number of elements in A1 */
-    n2 = n - n1;  /* the number of elements in A2 */
-    A1 = (int *) malloc(sizeof(int) * n1);
-    A2 = (int *) malloc(sizeof(int) * n2);
+    // Divide array into two
+    n1 = size / 2;
+    n2 = size - n1;
+    first = (int **) malloc(sizeof(int *) * n1);
+    last = (int **) malloc(sizeof(int *) * n2);
 
-    /* move the first n/2 elements to A1 */
     for (i = 0; i < n1; i++) {
-        A1[i] = A[i];
+        first[i] = array[i];
     }
-    /* move the rest to A2 */
     for (i = 0; i < n2; i++) {
-        A2[i] = A[i + n1];
+        last[i] = array[i + n1];
     }
-    /* recursive call */
-    mergeSort(A1, n1);
-    mergeSort(A2, n2);
+    // Recursion
+    mergeSort(first, n1);
+    mergeSort(last, n2);
 
-    /* conquer */
-    merge(A1, n1, A2, n2, A);
-    free(A1);
-    free(A2);
+    //Merge small arrays into one
+    merge(first, n1, last, n2, array);
+    free(first);
+    free(last);
+    first = NULL;
+    last = NULL;
 }
 
 int binarySearch(int **pointerArray, int *original, int length, int key) {
@@ -142,7 +144,8 @@ int binarySearch(int **pointerArray, int *original, int length, int key) {
     }
     if (first > last)
         printf("Not found! %d is not present in the list.\n", key);
-        return EXIT_SUCCESS;
+
+    return EXIT_SUCCESS;
 
 }
 
@@ -216,17 +219,21 @@ int main(int argc, char *argv[]) {
             switch (algorithmId) {
                 case 1:
                     bubbleSort(pointers, count);
+                    printf("Sorting with bubbleSort...\n");
                     break;
                 case 2:
                     insertionSort(pointers, count);
+                    printf("Sorting with insertionSort...\n");
                     break;
                 case 3:
-                    mergeSort(data, count);
+                    mergeSort(pointers, count);
+                    printf("Sorting with mergeSort...\n");
                     break;
                 case -1:
                     return EXIT_SUCCESS;
                 default:
-                    printf("Enter valid option(1,2,3). To exit, enter -1");
+                    printf("This was not a valid choice.\n");
+                    return EXIT_FAILURE;
             }
 
             printf("The list is now sorted.\n");
@@ -251,17 +258,16 @@ int main(int argc, char *argv[]) {
                 printf("Enter a number to search for (0 for exit):\n");
                 scanf("%d", &numberToSearch);
                 if (numberToSearch != 0) {
-                
-                            binarySearch(pointers, data, count, numberToSearch);
-                    
+
+                    binarySearch(pointers, data, count, numberToSearch);
 
                 }
             } while (numberToSearch != 0);
-
-
         }
-
     }
+
+    free (data);
+    free (pointers);
 
     return EXIT_SUCCESS;
 }
