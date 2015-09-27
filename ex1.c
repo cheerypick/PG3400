@@ -2,8 +2,6 @@
 #include <stdlib.h>
 
 void bubbleSort(int *data, int size) {
-                printf("bubble\n");
-
 
     int i, j, temp;
 
@@ -130,6 +128,7 @@ int binarySearch(int *array, int length, int key) {
     }
     if (first > last)
         printf("Not found! %d is not present in the list.\n", key);
+        return EXIT_SUCCESS;
 }
 
 int main(int argc, char *argv[]) {
@@ -181,21 +180,23 @@ int main(int argc, char *argv[]) {
                 count++;
 
             }
-
+            
             fclose(file);
 
             printf("Reading completed. File contains %d integers!\n", count);
             printf("Choose the sorting algorithm:\n");
             printf("1: Bubble sort\n");
             printf("2: Insertion sort\n");
+            printf("3: Merge sort\n");
+
             scanf("%d", &algorithmId);
 
             switch (algorithmId) {
                 case 1:
-                    bubbleSort(pointers, count);
+                    insertionSort(data, count);
                     break;
                 case 2:
-                    insertionSort(data, count);
+                    bubbleSort(data, count);
                     break;
                 case 3:
                     mergeSort(data, count);
@@ -217,22 +218,7 @@ int main(int argc, char *argv[]) {
                 scanf("%d", &numberToSearch);
                 if ( numberToSearch != 0)
                 {
-                    switch (algorithmId) {
-                case 1:
                     binarySearch(data, count, numberToSearch);
-                    break;
-                case 2:
-                    binarySearch(data, count, numberToSearch);
-                    break;
-                case 3:
-                    binarySearch(data, count, numberToSearch);
-                    break;
-                case -1:
-                    return EXIT_SUCCESS;
-                default:
-                    printf("enter choice as 1 or 2 or to exit enter -1");
-            }
-
                 }
             } while (numberToSearch != 0);
 
