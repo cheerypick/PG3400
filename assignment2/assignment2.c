@@ -66,7 +66,7 @@ char *getMessageFromFile(char *fileName) {
     return dest;
 }
 
-char *encode( char *inputMessageFile,  char *keyFile) {
+char *encode(char *inputMessageFile, char *keyFile, int d) {
 
     char *buffer;
 
@@ -84,7 +84,6 @@ char *encode( char *inputMessageFile,  char *keyFile) {
         buffer[i] = tolower(buffer[i]);
         while (!((buffer[i] >= 'a' && buffer[i] <= 'z') ||
                  ((buffer[i] >= 'A' && buffer[i] <= 'Z') || buffer[i] == '\0'))) {
-
             for (j = i; buffer[j] != '\0'; j++) {
                 buffer[j] = tolower(buffer[j + 1]);
             }
@@ -94,6 +93,12 @@ char *encode( char *inputMessageFile,  char *keyFile) {
 
     printf("Output String: ");
     printf("%s\n", buffer);
+
+
+    char *bufferCopy;
+    bufferCopy = malloc(sizeof(char) * strlen(buffer));
+    strcpy(bufferCopy, buffer);
+    printf("%s\n", bufferCopy);
 
 
     char *message = getMessageFromFile(inputMessageFile);
@@ -108,8 +113,11 @@ char *encode( char *inputMessageFile,  char *keyFile) {
         return NULL;
     }
 
+
     for (int i = 0; message[i] != '\0'; i++) {
         printf("encoding...: %c\n", message[i]);
+        int previous;
+
 
         //non-letters remain as is 
         if (!isalpha(message[i])) {
@@ -117,37 +125,73 @@ char *encode( char *inputMessageFile,  char *keyFile) {
             snprintf(letterResult, 3, "%c", message[i]);
             strncat (result, letterResult, 3);
         } else {
-            for (int j = 0; buffer[j] != 0; j++) {
-                printf("looking for i...: %c\n", buffer[j]);
-                if (buffer[j] == tolower(message[i])) {
-                    char letterResult[6];
-                    printf("found at index...: %d\n", j);
-                    if (isupper(message[i])) {
-                        snprintf(letterResult, 6, "[-%d]", j);
-                    } else {
-                        snprintf(letterResult, 6, "[%d]", j);
+
+            bool found = false;
+
+            while (!found) {
+
+                for (int j = 0; bufferCopy[j] != 0; j++) {
+
+                    //  printf("looking for i...: %c\n", bufferCopy[j]);
+
+
+                    if (bufferCopy[j] == tolower(message[i])) {
+
+                        //printf("%d\n", j);
+                        //  printf("%d\n", d);
+                        //printf("%d\n", previous);
+
+
+                      //  if ((abs(j - previous)) > d) {
+
+                            //printf("%d\n", j);
+                            // printf("%d\n", previous);
+
+                            found = true;
+                            char letterResult[6];
+                            bufferCopy[j] = ' '; //to ensure that same index is not used again for same letter
+                            printf("found at index...: %d\n", j);
+
+                            printf("%d\n", j - previous);
+                            previous = j;
+
+                            if (isupper(message[i])) {
+                                snprintf(letterResult, 6, "[-%d]", j);
+                            } else {
+                                snprintf(letterResult, 6, "[%d]", j);
+                            }
+                            strncat(result, letterResult, 6);
+                            break;
+
+                      //  } else {
+                       //     j++;
+                       // }
                     }
-                    strncat(result, letterResult, 6);
-                    break;
+                    printf("%d\n", j);
+                }
+                if (!found) {
+                    strcpy(bufferCopy,
+                           buffer);     //Then we try set in indexes that were removed even though those will be repeated
                 }
             }
         }
         printf("%s\n", result);
-        
+
     }
-        free(buffer);
-        return result;
-        free(result);
+
+    printf("%s\n", bufferCopy);
+    free(buffer);
+    return result;
 }
 
 
-char *decode (char *inputCodeFile, char *keyFile){
+char *decode(char *inputCodeFile, char *keyFile) {
 
     char *messageToDecode = inputCodeFile;
     int count = 0;
 
-    for (int i = 0; messageToDecode[i] != 0; ++i){
-        if(messageToDecode[i] == '[') {
+    for (int i = 0; messageToDecode[i] != 0; ++i) {
+        if (messageToDecode[i] == '[') {
             count++;
         }
     }
@@ -163,63 +207,57 @@ char *decode (char *inputCodeFile, char *keyFile){
     }
 
 
-int i, j;
-    for ( i = 0; key[i] != '\0'; i++) {
+    int i, j;
+
+    for (i = 0; key[i] != '\0'; i++) {
         key[i] = tolower(key[i]);
         while (!((key[i] >= 'a' && key[i] <= 'z') ||
                  ((key[i] >= 'A' && key[i] <= 'Z') || key[i] == '\0'))) {
 
-            for ( j = i; key[j] != '\0'; j++) {
+            for (j = i; key[j] != '\0'; j++) {
                 key[j] = tolower(key[j + 1]);
             }
             key[j] = '\0';
         }
     }
 
-printf("%s\n", key);
+ //   printf("%s\n", key);
 
-    for (int i = 0; messageToDecode[i] != 0; ++i){
+    for (int i = 0; messageToDecode[i] != 0; ++i) {
 
 
-
-        if(messageToDecode[i] == '[') {
+        if (messageToDecode[i] == '[') {
 
             char number[3];
             int j, a;
-            
-            for (j = i + 1, a = 0; messageToDecode[j] != ']'; ++j, ++a)
-            {
+
+            for (j = i + 1, a = 0; messageToDecode[j] != ']'; ++j, ++a) {
                 number[a] = messageToDecode[j];
-                //printf("%c\n", number[a]);
 
             }
 
             int numberAsInt = atoi(number);
-          //  printf ("The value entered is %d.\n", numberAsInt); 
-            memset(number,0,strlen(number));
-
-
+            memset(number, 0, strlen(number));
             printf("%c\n", (numberAsInt >= 0) ? key[numberAsInt] : toupper(key[abs(numberAsInt)]));
 
+            i += a + 1;
 
-            i+=a+1;
+        } else {
 
-       } else {
-        printf("%c\n", messageToDecode[i]);
-       }
+            printf("%c\n", messageToDecode[i]);
+
+        }
     }
 
-
-
-printf("%d\n", count);
 }
 
 int main() {
 
 
-char *message =  encode("message.txt", "letItGo.txt");
-decode(message, "letItGo.txt");
-free (message);
+    char *message = encode("message.txt", "letItGo.txt", 1);
+    decode(message, "letItGo.txt");
+    free(message);
+
     return EXIT_SUCCESS;
 
 /*
