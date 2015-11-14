@@ -1,0 +1,1 @@
+gcc assignment2.c -Wall -Wextra -std=c99 -o program
