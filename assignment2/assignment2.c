@@ -2,184 +2,114 @@
 PG3400 - Home exam 1
 By: Ekaterina Orlova
 **/
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <stdbool.h>
-#include <string.h>
-#include <time.h>
-
-char *getStringFromFile(char *fileName) {
-    char *dest = 0;
-
-    FILE *file = fopen(fileName, "rb");
-
-    if (file == 0) {
-        printf("Could not open file\n");
-        return NULL;
-    }
-
-    fseek(file, 0L, SEEK_END);
-    long length = ftell(file) + 1;
-    printf("Length is: %lu\n", length);
-    fseek(file, 0, SEEK_SET);
-    dest = calloc(length, 1);
-
-    if (dest == NULL) {
-        printf("Error allocating memory.\n");
-        return NULL;
-    }
-
-    fread(dest, 1, length, file);
-    fclose(file);
-    file = NULL;
-
-    return dest;
-}
-
-char *filterInput(char *key) {
-
-    int i, j;
-
-    for (i = 0; key[i] != '\0'; i++) {
-        key[i] = tolower(key[i]);
-        while (!((key[i] >= 'a' && key[i] <= 'z') ||
-                 ((key[i] >= 'A' && key[i] <= 'Z') || key[i] == '\0'))) {
-
-            for (j = i; key[j] != '\0'; j++) {
-                key[j] = tolower(key[j + 1]);
-            }
-            key[j] = '\0';
-        }
-    }
-    return key;
-
-}
-
-char* encode(char *messageFile, char *keyFile, int d) {
-
-    char *key = filterInput(getStringFromFile(keyFile));
-    char *message = getStringFromFile(messageFile);
-
-    size_t length = strlen(message);
-    // allocate enough memory for encoded string
-    char *result = calloc(5 * length, 1);//because sizeof char is always 1
-
-    srand(time(NULL));
- 
-
-    for (int i = 0; message[i] != '\0'; i++) {
-        printf("\nEncoding...: %c\n", message[i]);
-        int previous = 0;
-
-        //non-letters remain as is 
-        if (!isalpha(message[i])) {
-            char letterResult[2];
-            snprintf(letterResult, 2, "%c", message[i]);
-            strncat (result, letterResult, 1);
-        } else {
-            bool found = false;
-            int random = rand() % strlen(key);
-            printf("Random: %ul\n", random);
-
-            for (int j = 0; key[j] != 0; j++) {
-                int currentKeyCharIndex = (random + j) % strlen(key);
-                char currentKeyChar = key[currentKeyCharIndex];
-                printf("%c", currentKeyChar);
-
-                if (currentKeyChar == tolower(message[i])) {
-                    if ((abs(currentKeyCharIndex - previous)) > d) {
-                        found = true;
-                        char letterResult[8];
-         
-                        previous = currentKeyCharIndex;
-
-                        if (isupper(message[i])) {
-                            snprintf(letterResult, 8, "[-%d]", currentKeyCharIndex);
-                        } else {
-                            snprintf(letterResult, 8, "[%d]", currentKeyCharIndex);
-                        }
-                        strncat(result, letterResult, 8);
-                        break;
-                    }
-                }
-
-            }
-
-            if (!found) {
-                printf("It's not possible to satisfy d condition\n");
-                return NULL;
-            }
-        }
-    }
-    printf("Result: %s\n", result);
-    return result;
-}
-
-char *decode(char *inputCodeFile, char *keyFile) {
-
-    char *messageToDecode = inputCodeFile;
-
-    printf("%s\n", messageToDecode);
-
-    int count = 0;
-
-    for (int i = 0; messageToDecode[i] != 0; ++i) {
-        if (messageToDecode[i] == '[') {
-            count++;
-        }
-    }
-
-    char *key = filterInput(getStringFromFile(keyFile));
-
-    if (key == NULL) {
-        printf("File could not be opened.\n"); //print an error message
-        return NULL;
-    }
-
-            char number[3];
+#include "secretCoder.h"
 
 
-    for (int i = 0; messageToDecode[i] != 0; ++i) {
-        if (messageToDecode[i] == '[') {
-
-            int j, a;
-
-            for (j = i + 1, a = 0; messageToDecode[j] != ']'; ++j, ++a) {
-                number[a] = messageToDecode[j];
-            }
-
-            int numberAsInt = atoi(number);
-
-            if ((size_t)abs(numberAsInt) > strlen(key)) {
-                printf("Wrong file!\n" );
-                return NULL;
-            }
-            memset(number, 0, strlen(number));
-            printf("%c\n", (numberAsInt >= 0) ? key[numberAsInt] : toupper(key[abs(numberAsInt)]));
-
-            i += a + 1;
-
-        } else {
-            printf("%c\n", messageToDecode[i]);
-        }
-    }
-    return key;
-}
-
-
-int main() {
+char *findFirstWordByLength(char *stringToSearch, int minLength) {
     
-    char *encoded = encode("message.txt", "ex.txt", 2);
+    char *word = calloc(minLength+3, 1);
+    int i, a;
+    word[0] = '\n';
 
-    char *decoded = decode(encoded, "ex.txt");
 
-    printf("Decoded: %s\n", decoded);
+    for (i = 0, a = 1; stringToSearch[i] != '\0'; ++i) {
 
-    //char *message = encode("message.txt", "bohemianRhapsody.txt", 10);
-    //if( message ) decode(message, "bohemianRhapsody.txt");
+        if (isalpha(stringToSearch[i])) {
+            word[a] = stringToSearch[i];
+            a++;
+        }
+        else {
+            if (a > minLength) {
+                word[a] = '\n';
+                return word;
 
+            } else {
+                word[0] = '\n';
+                word[1] = '\0';
+                a = 1;
+            }
+        }
+    }
+    free(word);
+    word = NULL;
+    return NULL;
+}
+
+bool hasTxtExtension(char const *name) {
+    size_t len = strlen(name);
+    return len > 4 && strcmp(name + len - 4, ".txt") == 0;
+}
+
+int main(int argc, char *argv[]) {
+
+     if (argc != 2) {
+
+        printf("Please enter a d condition as a parameter.\n");
+        return EXIT_FAILURE;
+
+    }
+
+    int dCondition =  atoi(argv[1]);
+
+    printf("Minimum distance between adjacent codes will be set to %d\n", dCondition);
+
+    int statusEncode;
+    int statusDecode;
+
+    char *encoded = encodeWithD("message.txt", "letItGo.txt", dCondition, &statusEncode);
+    char *decoded;
+
+
+
+    if (statusEncode) {
+
+        printf("Decoded message with known key: %s\n", decode(encoded, "letItGo.txt", &statusDecode));
+
+
+        //Hacking the whole dictionary - bruteforce FTW!
+
+        DIR *d;
+        struct dirent *dir;
+        d = opendir("./");
+        if (d) {
+            while ((dir = readdir(d)) != NULL) {
+                if (hasTxtExtension(dir->d_name)) {
+                    printf("Trying to decode with following file: %s\n", dir->d_name);
+                    char *fileName = dir->d_name;
+                    decoded = decode(encoded, fileName, &statusDecode);
+
+                    if (decoded) {
+
+                        char *word = findFirstWordByLength(decoded, 5);
+                        printf("Searching for this word in dictionary: %s\n", word);
+
+                        char *dictionary = getStringFromFile("/usr/share/dict/words");
+
+                        char *stringFound = strstr(dictionary, word);
+                        if (stringFound) {
+                            printf("Found a possible message: %s\n", decoded);
+                            break;
+                        }
+                        free(word);
+                        free(dictionary);
+                        word = NULL;
+                    }
+
+                }
+            }
+
+            closedir(d);
+        }
+
+
+        free(decoded);
+        decoded = NULL;
+
+
+    }
+
+    free(encoded);
+    encoded = NULL;
     return EXIT_SUCCESS;
 
 }
